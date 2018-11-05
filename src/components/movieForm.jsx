@@ -1,8 +1,8 @@
 import React from "react"
 import Joi from "joi-browser"
 import Form from "./common/form"
-import { getMovie, saveMovie } from "../services/fakeMovieService"
-import { getGenres } from "../services/fakeGenreService"
+import { getMovie, saveMovie } from "../services/moviesService"
+import { getGenres } from "../services/genreService"
 
 class MovieForm extends Form {
   state = {
@@ -36,17 +36,27 @@ class MovieForm extends Form {
       .label("Daily Rental Rate")
   }
 
-  componentDidMount() {
-    const genres = getGenres() // getGenres from fakeGenreService and
+  async populateGenres() {
+    const { data: genres } = await getGenres() // getGenres from api backend and get data and rename it to genres
     this.setState({ genres }) // update the state
+  }
 
-    const movieId = this.props.match.params.id // read it in the route and store in movieId
-    if (movieId === "new") return
+  async populateMovie() {
+    try {
+      const movieId = this.props.match.params.id // read it in the route and store in movieId
+      if (movieId === "new") return
 
-    const movie = getMovie(movieId)
-    if (!movie) return this.props.history.replace("/not-found")
+      const { data: movie } = await getMovie(movieId)
+      this.setState({ data: this.mapToViewModel(movie) }) // get a movie from server and map to different kind of movie object we can use
+    } catch (ex) {
+      if (ex.response && ex.response.status === 404)
+        this.props.history.replace("/not-found")
+    }
+  }
 
-    this.setState({ data: this.mapToViewModel(movie) }) // get a movie from server and map to different kind of movie object we can use
+  async componentDidMount() {
+    await this.populateGenres()
+    await this.populateMovie()
   }
 
   mapToViewModel(movie) {
