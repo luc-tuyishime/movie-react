@@ -42,7 +42,7 @@ class LoginForm extends Form {
       <div>
         <div className="row justify-content-center">
           <div className="col-8">
-            <h1>Login(s)</h1>
+            <h1>Login</h1>
             <form onSubmit={this.handleSubmit}>
               {this.renderInput("username", "Username", "username")}
               {this.renderInput("password", "Password", "password", "password")}
